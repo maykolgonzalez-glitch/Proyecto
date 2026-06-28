@@ -7,10 +7,8 @@ class Producto {
     }
 
     // --- Lógica de categorización ---
-
     private function detectarCategoria($nombre) {
         $nombre = strtolower($nombre);
-        
         if (strpos($nombre, 'filtro') !== false) return 'Repuestos';
         if (strpos($nombre, 'turbo') !== false) return 'Sistema de Turbo';
         if (strpos($nombre, 'bujía') !== false || strpos($nombre, 'batería') !== false || 
@@ -25,8 +23,6 @@ class Producto {
 
     public function obtenerOCrearCategoria($nombre_categoria) {
         $nombre_normalizado = trim($nombre_categoria);
-        
-        // Buscamos si existe ignorando mayúsculas/minúsculas
         $stmt = $this->pdo->prepare("SELECT id_categoria FROM Categorias WHERE LOWER(nombre_categoria) = LOWER(?)");
         $stmt->execute([$nombre_normalizado]);
         $cat = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -53,23 +49,17 @@ class Producto {
         $stock = $datos['stock'] ?? 0;
         $id = $datos['id'] ?? null;
         
-        // Si escribiste algo, $nombre_cat toma ese valor. 
-        // Si no escribiste nada, el sistema lo detecta solo.
-        if (!empty($datos['categoria_manual'])) {
-            $nombre_cat = $datos['categoria_manual'];
-        } else {
-            $nombre_cat = $this->detectarCategoria($nombre);
-        }
-
-        // Esto busca el nombre en la BD. Si no existe, lo crea.
+        $nombre_cat = (!empty($datos['categoria_manual'])) ? $datos['categoria_manual'] : $this->detectarCategoria($nombre);
         $id_categoria = $this->obtenerOCrearCategoria($nombre_cat);
 
         if (!empty($id)) {
             $sql = "UPDATE Productos SET nombre = ?, precio = ?, stock_inventario = ?, id_categoria = ? WHERE id_producto = ?";
             $this->pdo->prepare($sql)->execute([$nombre, $precio, $stock, $id_categoria, $id]);
+            return $id; // Retornamos el ID existente
         } else {
             $sql = "INSERT INTO Productos (nombre, precio, stock_inventario, id_categoria) VALUES (?, ?, ?, ?)";
             $this->pdo->prepare($sql)->execute([$nombre, $precio, $stock, $id_categoria]);
+            return $this->pdo->lastInsertId(); // Retornamos el ID recién creado
         }
     }
 
@@ -103,42 +93,21 @@ class Producto {
     }
 
     public function eliminar($id) {
-        $imagenes = $this->obtenerImagenesPorProducto($id);
-        foreach ($imagenes as $img) {
-            if (file_exists($img['ruta_imagen'])) unlink($img['ruta_imagen']);
-        }
-        $this->pdo->prepare("DELETE FROM Producto_Imagenes WHERE id_producto = ?")->execute([$id]);
         $this->pdo->prepare("DELETE FROM Productos WHERE id_producto = ?")->execute([$id]);
         $this->limpiarCategoriasVacias();
     }
 
     // --- Gestión de Imágenes ---
 
-    public function obtenerImagenesPorProducto($id_producto) {
-        $stmt = $this->pdo->prepare("SELECT * FROM Producto_Imagenes WHERE id_producto = ?");
-        $stmt->execute([$id_producto]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    // Corregido: Se ha mantenido este método para evitar el error de "undefined method"
     public function contarImagenes($id_producto) {
-        $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM Producto_Imagenes WHERE id_producto = ?");
+        $stmt = $this->pdo->prepare("SELECT imagen FROM Productos WHERE id_producto = ?");
         $stmt->execute([$id_producto]);
-        return (int)$stmt->fetchColumn();
+        $prod = $stmt->fetch(PDO::FETCH_ASSOC);
+        return (!empty($prod['imagen'])) ? 1 : 0;
     }
 
     public function guardarImagen($id_producto, $ruta) {
-        $stmt = $this->pdo->prepare("INSERT INTO Producto_Imagenes (id_producto, ruta_imagen) VALUES (?, ?)");
-        $stmt->execute([$id_producto, $ruta]);
-    }
-
-    public function eliminarImagenPorId($id_imagen) {
-        $stmt = $this->pdo->prepare("SELECT ruta_imagen FROM Producto_Imagenes WHERE id_imagen = ?");
-        $stmt->execute([$id_imagen]);
-        $img = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($img && file_exists($img['ruta_imagen'])) {
-            unlink($img['ruta_imagen']);
-        }
-        $this->pdo->prepare("DELETE FROM Producto_Imagenes WHERE id_imagen = ?")->execute([$id_imagen]);
+        $stmt = $this->pdo->prepare("UPDATE Productos SET imagen = ? WHERE id_producto = ?");
+        $stmt->execute([$ruta, $id_producto]);
     }
 }

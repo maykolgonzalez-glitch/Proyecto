@@ -1,3 +1,8 @@
+<?php
+/** @var mixed $producto */
+/** @var mixed $categorias */
+require_once 'config/conexion.php'
+?>
 <?php 
 // Iniciamos el buffer para capturar el contenido y enviarlo al layout
 ob_start(); 
@@ -56,9 +61,8 @@ ob_start();
                 <td><?= $this->model->contarImagenes($p['id_producto']) ?> img</td>
 
                 <td>
-                    <a href="index.php?action=editar&id=<?= $p['id_producto'] ?>">Editar</a> | 
-                    <a href="index.php?action=eliminar&id=<?= $p['id_producto'] ?>" 
-                       onclick="return confirm('¿Estás seguro de eliminar este producto?')">Eliminar</a>
+                    <a href="index.php?page=home&action=editar&id=<?= $p['id_producto'] ?>" class="btn btn-editar">Editar</a>
+                    <a href="index.php?page=home&action=eliminar&id=<?= $p['id_producto'] ?>" class="btn btn-eliminar" onclick="return confirm('¿Seguro?')">Eliminar</a>
                 </td>
             </tr>
             <?php endforeach; ?>

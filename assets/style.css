@@ -66,3 +66,56 @@
 .stock-amarillo { color: #f39c12; font-weight: bold; } /* 3 a 8 */
 .stock-rojo { color: #e74c3c; font-weight: bold; }    /* 1 a 2 */
 .stock-gris { color: #7f8c8d; font-weight: bold; }    /* 0 */
+
+.btn {
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.3s ease;
+    display: inline-block;
+}
+
+.btn-editar {
+    background-color: #3498db;
+    color: white;
+}
+
+.btn-editar:hover {
+    background-color: #2980b9;
+}
+
+.btn-eliminar {
+    background-color: #e74c3c;
+    color: white;
+    margin-left: 5px;
+}
+
+.btn-eliminar:hover {
+    background-color: #c0392b;
+}
+
+.acciones {
+    white-space: nowrap; /* Evita que los botones se separen en dos líneas */
+}
+/* Asegura que la celda de la tabla no fuerce saltos de línea */
+td.acciones {
+    white-space: nowrap;
+    display: flex;       /* Esto alinea horizontalmente */
+    gap: 8px;            /* Espacio entre botones */
+    align-items: center; /* Alineación vertical centrada */
+}
+
+/* Ajuste de los botones */
+.btn {
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    color: white;
+    font-size: 13px;
+    display: inline-block;
+}
+
+.btn-editar { background-color: #3498db; }
+.btn-eliminar { background-color: #e74c3c; }

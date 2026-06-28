@@ -1,3 +1,7 @@
+<?php
+/** @var mixed $producto */
+/** @var mixed $contenido */
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
